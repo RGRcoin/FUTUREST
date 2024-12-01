@@ -28,11 +28,13 @@
         h1 {
             font-size: 48px;
             margin-bottom: 10px;
+            text-align: center;
         }
 
         h2 {
             font-size: 24px;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         textarea {
@@ -42,6 +44,7 @@
             font-size: 18px;
             border: none;
             border-radius: 5px;
+            margin-bottom: 10px; /* Добавлено пространство снизу */
         }
 
         button {
@@ -85,6 +88,9 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
             text-align: center;
             line-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .donate-button:hover {
@@ -110,9 +116,9 @@
 <body>
     <h1>FUTUREST</h1>
     <h2>Бесплатный наставник на любое действие</h2>
+    <button onclick="generateResponse()" id="askButton">Получить ответ</button> <!-- Кнопка под текстом -->
     <div class="timer" id="timer">Следующий вопрос через: 10 сек</div>
     <textarea id="userInput" placeholder="Введите ваш вопрос..."></textarea>
-    <button onclick="generateResponse()" id="askButton">Получить ответ</button>
     
     <div class="response" id="response"></div>
     <div class="instruction">Первый ответ - самый правильный, остальные - ваши хотелки.</div>
@@ -155,7 +161,7 @@
             const userInput = document.getElementById('userInput').value.trim();
             
             if (!userInput) {
-                alert("Пожалуйста, введите свой вопрос!"); // Пожелание иначе
+                alert("Пожалуйста, введите свой вопрос!");
                 return;
             }
 
@@ -171,7 +177,7 @@
             // Проверяем, состоит ли ввод только из одного слова
             if (userInput.split(' ').length === 1) {
                 const response = "Вау, над ботом так круто шутить, ты гордишься собой?";
-                animateResponse(response.split(' ').join('_')); // Заменяем пробелы на _
+                animateResponse(response.split(' ').join('_'));
                 startCountdown();
                 return;
             }
@@ -194,8 +200,8 @@
             let timeLeft = 10; // Время ожидания в секундах
             
             timerDisplay.innerText = `Следующий вопрос через: ${timeLeft} сек`;
-            clearInterval(countdownTimer); // Очищаем предыдущий таймер если он есть
-            
+            clearInterval(countdownTimer);
+
             countdownTimer = setInterval(() => {
                 timeLeft--;
                 timerDisplay.innerText = `Следующий вопрос через: ${timeLeft} сек`;
@@ -208,8 +214,8 @@
 
         function animateResponse(response) {
             const responseField = document.getElementById('response');
-            responseField.innerText = ''; // Очистить предыдущий текст
-            responseField.style.display = 'block'; // Показываем ответ
+            responseField.innerText = '';
+            responseField.style.display = 'block';
 
             let index = 0;
             const typingEffect = setInterval(() => {
@@ -218,17 +224,17 @@
                     index++;
                 } else {
                     clearInterval(typingEffect);
-                    makeBackgroundFlash(); // Вызов вспышки фона после завершения печатания
+                    makeBackgroundFlash();
                 }
-            }, 50); // Скорость печатания (в мс)
+            }, 50);
         }
 
         function makeBackgroundFlash() {
-            const originalColor = getComputedStyle(document.body).backgroundColor; // Получить текущий цвет фона
-            document.body.style.backgroundColor = 'white'; // Сделать фон ярче
+            const originalColor = getComputedStyle(document.body).backgroundColor;
+            document.body.style.backgroundColor = 'white';
             setTimeout(() => {
-                document.body.style.backgroundColor = originalColor; // Вернуться к оригинальному цвету
-            }, 300); // Длительность вспышки (в мс)
+                document.body.style.backgroundColor = originalColor;
+            }, 300);
         }
 
         function showDonateInfo() {
