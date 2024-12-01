@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUTUREST</title>
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            animation: gradient 8s ease infinite; /* Анимация градиента */
+        }
+
+        @keyframes gradient {
+            0% { background-color: #00008B; }
+            25% { background-color: #0000ff; }
+            50% { background-color: #00BFFF; }
+            75% { background-color: #1E90FF; }
+            100% { background-color: #00008B; }
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 300px;
+            height: 100px;
+            padding: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #1E90FF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .response {
+            display: none; /* Скрываем изначально */
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 24px;
+            min-width: 300px;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .donate-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #1E90FF;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            line-height: 30px;
+        }
+
+        .donate-button:hover {
+            background-color: #00BFFF;
+        }
+
+        .instruction {
+            margin-top: 60px;
+            font-size: 20px;
+            color: yellow;
+            position: fixed;
+            bottom: 60px;
+            text-align: center;
+        }
+
+        .timer {
+            font-size: 18px;
+            color: yellow;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>FUTUREST</h1>
+    <h2>Бесплатный наставник на любое действие</h2>
+    <div class="timer" id="timer">Следующий вопрос через: 10 сек</div>
+    <textarea id="userInput" placeholder="Введите ваш вопрос..."></textarea>
+    <button onclick="generateResponse()" id="askButton">Получить ответ</button>
+    
+    <div class="response" id="response"></div>
+    <div class="instruction">Первый ответ - самый правильный, остальные - ваши хотелки.</div>
+
+    <button class="donate-button" onclick="showDonateInfo()">₽</button>
+
+    <script>
+        const responses = [
+            "Да.", "Нет.", "Возможно.", "Конечно.", "Ни в коем случае.",
+            "Абсолютно.", "Категорически нет.", "Да, точно.",
+            "Вполне возможно.", "Уверенно, да.", "Нет, это не лучший выбор.",
+            "Определенно нет.", "Да, однозначно.", 
+            "Может быть, стоит попробовать.", "Да, следует это сделать.", 
+            "Не думаю.", "Безусловно.", "Сложно сказать.", 
+            "Однозначно да.", "Совершенно нет.", "Непременно.", 
+            "Нет, лучше этого избегать.", "Возможно, это имеет смысл.", 
+            "Конечно, стоит попробовать.", "Ни в коем случае, не стоит.",
+            "Я думаю, да.", "Скорее всего, нет.", "Есть вероятность, что да.",
+            "Боюсь, нет.", "Да, это возможность.", "Это может сработать.",
+            "Нет, не стоит рисковать.", "Да, действуй.", 
+            "Согласен, это правильное решение.", "Не уверен.", 
+            "Да, рекомендую.", "Нет, это не оправдано.", 
+            "Наверняка да.", "Предположительно, нет.",
+            "Это возможно.", "Скорее всего, да.", "Согласен, стоит попробовать.",
+            "Да, начинай действовать.", "Нет, это может быть проблемой.",
+        ];
+
+        const sensitiveWords = ["смерть", "убийство", "умереть", "суицид", "убийство", "покончить", "самоубийство"];
+
+        let lastQuestionTime = 0;
+        let countdownTimer;
+
+        function generateResponse() {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastQuestionTime < 10000) {
+                alert("Пожалуйста, подождите перед следующей попыткой. Нужно ждать 10 секунд.");
+                return;
+            }
+
+            const userInput = document.getElementById('userInput').value.trim();
+            
+            if (!userInput) {
+                alert("Пожалуйста, введите свой вопрос!"); // Пожелание иначе
+                return;
+            }
+
+            // Проверка на наличие чувствительных слов
+            const containsSensitiveWords = sensitiveWords.some(word => userInput.toLowerCase().includes(word));
+            if (containsSensitiveWords) {
+                const response = "Ты что, совсем и не думай о таком!!";
+                animateResponse(response.split(' ').join('_')); // Заменяем пробелы на _
+                startCountdown();
+                return;
+            }
+
+            // Проверяем, состоит ли ввод только из одного слова
+            if (userInput.split(' ').length === 1) {
+                const response = "Вау, над ботом так круто шутить, ты гордишься собой?";
+                animateResponse(response.split(' ').join('_')); // Заменяем пробелы на _
+                startCountdown();
+                return;
+            }
+
+            if (!userInput.endsWith("?")) {
+                alert("Пожалуйста, задайте вопрос, заключающийся в вопросительном знаке!");
+                return;
+            }
+
+            lastQuestionTime = currentTime; // Обновление времени последнего вопроса
+            
+            const randomIndex = Math.floor(Math.random() * responses.length);
+            const response = responses[randomIndex].split(' ').join('_'); // Заменяем пробелы на _
+            animateResponse(response);
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const timerDisplay = document.getElementById('timer');
+            let timeLeft = 10; // Время ожидания в секундах
+            
+            timerDisplay.innerText = `Следующий вопрос через: ${timeLeft} сек`;
+            clearInterval(countdownTimer); // Очищаем предыдущий таймер если он есть
+            
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = `Следующий вопрос через: ${timeLeft} сек`;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    timerDisplay.innerText = "Вы готовы задать новый вопрос!";
+                }
+            }, 1000); // Обновление каждую секунду
+        }
+
+        function animateResponse(response) {
+            const responseField = document.getElementById('response');
+            responseField.innerText = ''; // Очистить предыдущий текст
+            responseField.style.display = 'block'; // Показываем ответ
+
+            let index = 0;
+            const typingEffect = setInterval(() => {
+                if (index < response.length) {
+                    responseField.innerText += response.charAt(index);
+                    index++;
+                } else {
+                    clearInterval(typingEffect);
+                    makeBackgroundFlash(); // Вызов вспышки фона после завершения печатания
+                }
+            }, 50); // Скорость печатания (в мс)
+        }
+
+        function makeBackgroundFlash() {
+            const originalColor = getComputedStyle(document.body).backgroundColor; // Получить текущий цвет фона
+            document.body.style.backgroundColor = 'white'; // Сделать фон ярче
+            setTimeout(() => {
+                document.body.style.backgroundColor = originalColor; // Вернуться к оригинальному цвету
+            }, 300); // Длительность вспышки (в мс)
+        }
+
+        function showDonateInfo() {
+            alert("Пожалуйста, киньте 1 рубль на Сбер по номеру: +79782464836 для улучшения проекта.");
+        }
+    </script>
+</body>
+</html>
